@@ -51,10 +51,9 @@ def load_data():
 df = load_data()
 symptom_columns = [col for col in df.columns if "Symptom" in col]
 
-from dotenv import load_dotenv
 import os
 
-load_dotenv()
+
 
 groq_api_key = os.getenv("GROQ_API_KEY")
 # Ensure key is found
