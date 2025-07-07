@@ -46,7 +46,7 @@ st.markdown("""
 # ---------------- Dataset ----------------
 @st.cache_data
 def load_data():
-    return pd.read_csv(r'C:\Kaam\projects\Antarnaa\sample_3.csv')
+    return pd.read_csv(r'sample_3.csv')
 
 df = load_data()
 symptom_columns = [col for col in df.columns if "Symptom" in col]
