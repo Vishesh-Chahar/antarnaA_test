@@ -12,4 +12,4 @@ jobs:
 
     env:
       GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
-    run: table_box.py
+    run: python table_box.py
