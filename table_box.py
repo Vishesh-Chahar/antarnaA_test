@@ -51,9 +51,14 @@ def load_data():
 df = load_data()
 symptom_columns = [col for col in df.columns if "Symptom" in col]
 
-# ---------------- Groq Setup ----------------
-groq_api_key = "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"
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+groq_api_key = os.getenv("GROQ_API_KEY")
 groq_client = groq.Groq(api_key=groq_api_key)
+
 
 # ---------------- Helper Functions ----------------
 def clean_sql(raw_sql):
