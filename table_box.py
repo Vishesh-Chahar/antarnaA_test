@@ -46,7 +46,7 @@ st.markdown("""
 # ---------------- Dataset ----------------
 @st.cache_data
 def load_data():
-    return pd.read_csv(r'sample.csv')
+    return pd.read_csv(r'C:\Kaam\projects\Antarnaa\sample_3.csv')
 
 df = load_data()
 symptom_columns = [col for col in df.columns if "Symptom" in col]
@@ -138,10 +138,6 @@ with right:
         st.markdown("---")
         symptom_context = describe_unique_values(df, symptom_columns)
 
-        column_sql = " OR ".join(
-            [f"{col} LIKE '%{{symptom}}%' OR {col} = '{{symptom}}'" for col in symptom_columns]
-        )
-
         prompt = f"""
 You are a SQL assistant for symptom-based diagnosis.
 
@@ -153,7 +149,7 @@ Columns:
 
 User input: {symptoms_text}
 
-Generate a SQL query that selects Disease No. from DiseaseData where any of these columns: {', '.join(symptom_columns)} contain or equal one or more of the user's symptoms using LIKE or = for multiple symptoms, use AND not OR. Only return the query.
+Generate a SQL query that selects Ayurvedic_Diagnosis from DiseaseData where any of these columns: {', '.join(symptom_columns)}, please note, the names need to be put verbatim contain or equal one or more of the user's symptoms using LIKE or =. For multiple symptoms, use AND to combine conditions. Only return the query.
 """
 
         response = groq_client.chat.completions.create(
@@ -177,7 +173,7 @@ Generate a SQL query that selects Disease No. from DiseaseData where any of thes
 
             if not results.empty:
                 st.success("✅ Possible disease(s) found:")
-                st.write(results['Disease No.'].unique().tolist())
+                st.write(results['Ayurvedic_Diagnosis'].unique().tolist())
             else:
                 st.warning("⚠️ No diseases matched the symptoms provided.")
         except Exception as e:
