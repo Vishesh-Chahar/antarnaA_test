@@ -167,6 +167,6 @@ with col3:
         tokens = set(" ".join(filtered).split())
         suggestions = sorted(tokens - set(user_input.split()))
         st.write(suggestions[:10])
-    }
+  
   ]
 }
