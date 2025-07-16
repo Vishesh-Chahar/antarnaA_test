@@ -162,9 +162,9 @@ Generate a SQL query that selects Ayurvedic_Diagnosis from DiseaseData where any
 """
 
         response = groq_client.chat.completions.create(
-            model="meta-llama/llama-4-maverick-17b-128e-instruct",
+            model="qwen/qwen3-32b",
             messages=[
-                {"role": "system", "content": "You convert symptoms to SQL queries."},
+                {"role": "system", "content": "You convert symptoms to SQL queries. /nothink"},
                 {"role": "user", "content": prompt}
             ],
             temperature=0.1
