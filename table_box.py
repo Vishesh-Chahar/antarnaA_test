@@ -141,7 +141,8 @@ with left:
 with right:
     st.subheader("📝 Enter Symptoms")
     symptoms_text = st.text_area("Type multiple symptoms:", height=250, placeholder="e.g. burning sensation while urinating, nausea after eating")
-
+    symptoms_text_list = symptoms_text.split()
+    symptoms_text = ", ".join(symptoms_text_list)
     if st.button("🧬 Diagnose") and symptoms_text:
         st.markdown("---")
         symptom_context = describe_unique_values(df, symptom_columns)
