@@ -55,7 +55,6 @@ symptom_columns = [col for col in df.columns if "Symptom" in col]
 
 # ---------------- Vector DB ----------------
 @st.cache_resource
-
 def build_or_load_embeddings():
     embed_file = "embeddings.pkl"
     if os.path.exists(embed_file):
@@ -120,9 +119,10 @@ categories = {
 
 # ---------------- UI Layout ----------------
 st.title("🧠 Symptom Navigator + Local Vector Diagnosis")
-left, right = st.columns([2, 1])
 
-with left:
+col1, col2, col3 = st.columns([1.5, 1.5, 1])
+
+with col1:
     st.subheader("🔍 Explore by Category")
     for cat, sub_map in categories.items():
         with st.expander(cat):
@@ -135,17 +135,38 @@ with left:
                     """, unsafe_allow_html=True
                 )
 
-with right:
+with col2:
     st.subheader("📝 Enter Symptoms")
     user_input = st.text_area("Type multiple symptoms:", height=250, placeholder="e.g. burning sensation while urinating, nausea after eating")
+
+    threshold = st.slider("🔬 Similarity Threshold for 'Relevant' Matches", min_value=0.0, max_value=1.0, value=0.75, step=0.01)
 
     if st.button("🧬 Vector Search Diagnose") and user_input:
         input_embedding = model.encode([user_input])[0]
         similarities = cosine_similarity([input_embedding], symptom_embeddings)[0]
 
-        top_k = 10
-        top_indices = similarities.argsort()[-top_k:][::-1]
-        top_diagnoses = df.iloc[top_indices]["Ayurvedic_Diagnosis"].unique().tolist()
+        df["similarity"] = similarities
 
-        st.success("✅ Most relevant disease(s):")
-        st.write(top_diagnoses)
+        exact_match = df[df[symptom_columns].apply(lambda row: any(sym.lower() in user_input.lower() for sym in row.astype(str)), axis=1)]
+        relevant_match = df[df["similarity"] >= threshold]
+
+        st.markdown("### 🧾 Exact Match Diagnoses")
+        st.dataframe(exact_match[["Ayurvedic_Diagnosis"] + symptom_columns])
+
+        st.markdown("### 📋 Relevant Diagnoses by Similarity")
+        st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"] + symptom_columns].sort_values(by="similarity", ascending=False))
+
+with col3:
+    st.subheader("🧠 Suggested Narrowing Symptoms")
+    if user_input:
+        input_embedding = model.encode([user_input])[0]
+        similarities = cosine_similarity([input_embedding], symptom_embeddings)[0]
+        df["similarity"] = similarities
+        top_indices = similarities.argsort()[-5:][::-1]
+        filtered = df.iloc[top_indices][symptom_columns].fillna("").agg(" ".join, axis=1)
+        tokens = set(" ".join(filtered).split())
+        suggestions = sorted(tokens - set(user_input.split()))
+        st.write(suggestions[:10])
+    }
+  ]
+}
