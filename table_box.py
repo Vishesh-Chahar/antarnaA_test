@@ -152,12 +152,11 @@ with col2:
 
         st.markdown("### 🧾 Exact Match Diagnoses")
         st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
-with col3:
+
         st.markdown("### 📋 Relevant Diagnoses by Similarity")
         st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
-
+with col3:
         # ---------------- Adaptive Suggestions ----------------
-        st.markdown("---")
         st.subheader("🧠 Suggested Narrowing Symptoms")
         subset = relevant_match.copy()
         symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
