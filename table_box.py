@@ -65,9 +65,16 @@ groq_client = groq.Groq(api_key=groq_api_key)
 
 # ---------------- Helper Functions ----------------
 def clean_sql(raw_sql):
-    cleaned = re.sub(r"```sql|```", "", raw_sql, flags=re.IGNORECASE).strip()
-    cleaned = re.sub(r"--.*?$", "", cleaned, flags=re.MULTILINE).strip()
-    return cleaned
+    # Remove code block formatting
+    raw_sql = re.sub(r"```sql|```", "", raw_sql, flags=re.IGNORECASE).strip()
+    raw_sql = re.sub(r"--.*?$", "", raw_sql, flags=re.MULTILINE).strip()
+
+    # Extract only the first SELECT statement
+    match = re.search(r"(?i)\bSELECT\b.*?;", raw_sql, re.DOTALL)
+    if match:
+        return match.group(0).strip()
+    return raw_sql  # fallback if no SELECT found
+
 
 def describe_unique_values(df, columns, max_per_col=10):
     context = "Here are some example values for each column:\n"
