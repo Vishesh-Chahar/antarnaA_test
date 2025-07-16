@@ -156,14 +156,26 @@ with col2:
         st.markdown("### 📋 Relevant Diagnoses by Similarity")
         st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
 
-with col3:
-    st.subheader("🧠 Suggested Narrowing Symptoms")
-    if user_input:
-        input_embedding = model.encode([user_input])[0]
-        similarities = cosine_similarity([input_embedding], symptom_embeddings)[0]
-        df["similarity"] = similarities
-        top_indices = similarities.argsort()[-5:][::-1]
-        filtered = df.iloc[top_indices][symptom_columns].fillna("").agg(" ".join, axis=1)
-        tokens = set(" ".join(filtered).split())
-        suggestions = sorted(tokens - set(user_input.split()))
-        st.write(suggestions[:10])
+        # ---------------- Adaptive Suggestions ----------------
+        st.markdown("---")
+        st.subheader("🧠 Suggested Narrowing Symptoms")
+        subset = relevant_match.copy()
+        symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
+        input_tokens = set(re.findall(r"\w+", user_input.lower()))
+
+        entropy_scores = {}
+        for col in symptom_columns:
+            values = symptom_pool[col]
+            freq = values.value_counts(normalize=True)
+            entropy = -np.sum(freq * np.log2(freq)) if not freq.empty else 0
+            entropy_scores[col] = entropy
+
+        top_col = max(entropy_scores, key=entropy_scores.get)
+        new_symptoms = set(symptom_pool[top_col]) - input_tokens - {''}
+        suggestions = sorted(new_symptoms)[:10]
+
+        if suggestions:
+            st.write(f"Most discriminative symptom field: **{top_col}**")
+            st.write("Try asking about:", suggestions)
+        else:
+            st.write("No additional narrowing symptoms found.")
