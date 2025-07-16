@@ -151,10 +151,10 @@ with col2:
         relevant_match = df[df["similarity"] >= threshold]
 
         st.markdown("### 🧾 Exact Match Diagnoses")
-        st.dataframe(exact_match[["Ayurvedic_Diagnosis"] + symptom_columns])
+        st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
 
         st.markdown("### 📋 Relevant Diagnoses by Similarity")
-        st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"] + symptom_columns].sort_values(by="similarity", ascending=False))
+        st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
 
 with col3:
     st.subheader("🧠 Suggested Narrowing Symptoms")
