@@ -120,7 +120,7 @@ categories = {
 # ---------------- UI Layout ----------------
 st.title("🧠 Symptom Navigator + Local Vector Diagnosis")
 
-col1, col2, col3 = st.columns([1.5, 1.5, 1])
+col1, col2, col3 = st.columns([1, 1, 1])
 
 with col1:
     st.subheader("🔍 Explore by Category")
@@ -152,7 +152,7 @@ with col2:
 
         st.markdown("### 🧾 Exact Match Diagnoses")
         st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
-
+with col3:
         st.markdown("### 📋 Relevant Diagnoses by Similarity")
         st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
 
