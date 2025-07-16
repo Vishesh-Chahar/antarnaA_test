@@ -143,7 +143,7 @@ with right:
         input_embedding = model.encode([user_input])[0]
         similarities = cosine_similarity([input_embedding], symptom_embeddings)[0]
 
-        top_k = 5
+        top_k = 10
         top_indices = similarities.argsort()[-top_k:][::-1]
         top_diagnoses = df.iloc[top_indices]["Ayurvedic_Diagnosis"].unique().tolist()
 
