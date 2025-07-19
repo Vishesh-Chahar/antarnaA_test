@@ -158,7 +158,7 @@ with col2:
         st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
 
 with col3:
-        # ---------------- Adaptive Suggestions ----------------
+        # --------------- Adaptive Suggestions ----------------
         st.subheader("🧠 Suggested Narrowing Symptoms")
         subset = pd.concat([exact_match, relevant_match]).drop_duplicates()
         symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
