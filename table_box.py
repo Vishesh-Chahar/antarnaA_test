@@ -136,7 +136,6 @@ with col1:
                     """, unsafe_allow_html=True
                 )
               
-
 with col2:
     st.subheader("📝 Enter Symptoms")
     user_input = st.text_area("Type multiple symptoms:", height=250, placeholder="e.g. burning sensation while urinating, nausea after eating")
