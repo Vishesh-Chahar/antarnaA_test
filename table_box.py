@@ -120,7 +120,7 @@ categories = {
 # ---------------- UI Layout ----------------
 st.title("🧠 Symptom Navigator + Local Vector Diagnosis")
 
-col1, col2, col3 = st.columns([1, 1, 1])
+col1, col2, col3 = st.columns([1.5, 1.5, 1])
 
 with col1:
     st.subheader("🔍 Explore by Category")
@@ -142,7 +142,7 @@ with col2:
     threshold = st.slider("🔬 Similarity Threshold for 'Relevant' Matches", min_value=0.0, max_value=1.0, value=0.75, step=0.01)
 
     if st.button("🧬 Vector Search Diagnose") and user_input:
-        input_embedding = model.encode([user_input])[0]
+        input_embedding = model.encode([user_input], device='cpu')[0]  # Explicit device to avoid meta errors
         similarities = cosine_similarity([input_embedding], symptom_embeddings)[0]
 
         df["similarity"] = similarities
@@ -155,10 +155,11 @@ with col2:
 
         st.markdown("### 📋 Relevant Diagnoses by Similarity")
         st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
-with col3:
+
         # ---------------- Adaptive Suggestions ----------------
+        st.markdown("---")
         st.subheader("🧠 Suggested Narrowing Symptoms")
-        subset = relevant_match.copy()
+        subset = pd.concat([exact_match, relevant_match]).drop_duplicates()
         symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
         input_tokens = set(re.findall(r"\w+", user_input.lower()))
 
