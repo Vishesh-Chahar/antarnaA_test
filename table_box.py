@@ -157,6 +157,7 @@ with col2:
         st.markdown("### 📋 Relevant Diagnoses by Similarity")
         st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
 
+with col3:
         # ---------------- Adaptive Suggestions ----------------
         st.markdown("---")
         st.subheader("🧠 Suggested Narrowing Symptoms")
