@@ -134,13 +134,14 @@ with col1:
                     </div>
                     """, unsafe_allow_html=True
                 )
+              
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
 with col2:
     st.subheader("📝 Enter Symptoms")
     user_input = st.text_area("Type multiple symptoms:", height=250, placeholder="e.g. burning sensation while urinating, nausea after eating")
 
     threshold = st.slider("🔬 Similarity Threshold for 'Relevant' Matches", min_value=0.0, max_value=1.0, value=0.75, step=0.01)
-    model = SentenceTransformer("all-MiniLM-L6-v2")
 
     if st.button("🧬 Vector Search Diagnose") and user_input:
         input_embedding = model.encode([user_input])[0]  # Explicit device to avoid meta errors
