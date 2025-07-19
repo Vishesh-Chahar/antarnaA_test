@@ -71,7 +71,7 @@ def build_or_load_embeddings():
     return embeddings
 
 symptom_embeddings = build_or_load_embeddings()
-model = SentenceTransformer("all-MiniLM-L6-v2", device_map = "cpu")
+# model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # ---------------- Category Map ----------------
 categories = {
