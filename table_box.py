@@ -159,7 +159,6 @@ with col2:
 
 with col3:
         # ---------------- Adaptive Suggestions ----------------
-        st.markdown("---")
         st.subheader("🧠 Suggested Narrowing Symptoms")
         subset = pd.concat([exact_match, relevant_match]).drop_duplicates()
         symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
