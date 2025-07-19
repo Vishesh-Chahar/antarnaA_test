@@ -116,6 +116,7 @@ categories = {
         "22. Unclassified or Other Symptoms": "Other unexplained signs"
     }
 }
+model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # ---------------- UI Layout ----------------
 st.title("🧠 Symptom Navigator + Local Vector Diagnosis")
@@ -135,7 +136,6 @@ with col1:
                     """, unsafe_allow_html=True
                 )
               
-model = SentenceTransformer("all-MiniLM-L6-v2")
 
 with col2:
     st.subheader("📝 Enter Symptoms")
