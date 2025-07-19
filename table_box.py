@@ -142,6 +142,8 @@ with col2:
     threshold = st.slider("🔬 Similarity Threshold for 'Relevant' Matches", min_value=0.0, max_value=1.0, value=0.75, step=0.01)
 
     if st.button("🧬 Vector Search Diagnose") and user_input:
+        model = SentenceTransformer("all-MiniLM-L6-v2")
+
         input_embedding = model.encode([user_input], device='cpu')[0]  # Explicit device to avoid meta errors
         similarities = cosine_similarity([input_embedding], symptom_embeddings)[0]
 
