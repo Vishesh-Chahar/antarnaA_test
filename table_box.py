@@ -7,6 +7,7 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 
+
 # ---------------- Configuration ----------------
 st.set_page_config(layout="wide")
 
