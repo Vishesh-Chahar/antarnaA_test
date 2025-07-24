@@ -200,7 +200,7 @@ if uploaded_file:
             st.write(cleaned_relevant)
     with col3:
         st.subheader("🧠 Suggested Narrowing Symptoms")
-        subset = pd.concat([exact_diagnosis, relevant_diagnoses]).drop_duplicates()
+        subset = pd.concat([exact_diagnoses, relevant_diagnoses]).drop_duplicates()
         symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
         input_tokens = set(re.findall(r"\w+", user_input.lower()))
 
