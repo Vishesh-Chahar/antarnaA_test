@@ -179,7 +179,7 @@ if uploaded_file:
             df["sim_P1"] = sim_p1
             df["sim_P2"] = sim_p2
 
-            exact_match = df[df[["Symptom_P1", "Symptom_P2"]].apply(
+            relevant_match = df[df[["Symptom_P1", "Symptom_P2"]].apply(
                 lambda row: any(sym.lower() in user_input_clean.lower() for sym in row.astype(str)), axis=1)]
 
             relevant_p1 = df[df["sim_P1"] >= threshold].sort_values("sim_P1", ascending=False)
@@ -187,10 +187,9 @@ if uploaded_file:
 
             combined_sim = np.maximum(df["sim_P1"], df["sim_P2"])
             df["similarity"] = combined_sim
-            relevant_match = df[df["similarity"] <= threshold]
+            exact_match = df[df["similarity"] >= threshold]
 
             st.markdown("### 🧾 Exact Match Diagnoses")
-            
             exact_diagnoses = exact_match["Ayurvedic_Diagnosis"].dropna().astype(str)
             cleaned_exact = list(set(re.sub(r"^\s*\d+\s*", "", diag) for diag in exact_diagnoses))
             st.write(cleaned_exact)
