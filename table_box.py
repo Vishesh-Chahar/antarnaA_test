@@ -216,8 +216,8 @@ if uploaded_file:
                 new_symptoms = set(symptom_pool[top_col]) - input_tokens - {''}
                 suggestions = sorted(new_symptoms)[:10]
 
-        if suggestions:
-            st.write(f"Most discriminative symptom field: **{top_col}**")
-            st.write("Try asking about:", suggestions)
-        else:
-            st.write("No additional narrowing symptoms found.")
+                if suggestions:
+                    st.write(f"Most discriminative symptom field: **{top_col}**")
+                    st.write("Try asking about:", suggestions)
+                else:
+                    st.write("No additional narrowing symptoms found.")
