@@ -6,6 +6,7 @@ import os
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
+import groq
 
 groq_api_key = os.getenv("GROQ_API_KEY")
 groq_client = groq.Groq(api_key=groq_api_key)
