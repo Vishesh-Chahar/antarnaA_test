@@ -199,22 +199,22 @@ if uploaded_file:
             relevant_diagnoses = relevant_match["Ayurvedic_Diagnosis"].dropna().astype(str)
             cleaned_relevant = list(set(re.sub(r"^\s*\d+\s*", "", diag) for diag in relevant_diagnoses))
             st.write(cleaned_relevant)
-    with col3:
-        st.subheader("🧠 Suggested Narrowing Symptoms")
-        subset = pd.concat([exact_match, relevant_match]).drop_duplicates()
-        symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
-        input_tokens = set(re.findall(r"\w+", user_input.lower()))
-
-        entropy_scores = {}
-        for col in symptom_columns:
-            values = symptom_pool[col]
-            freq = values.value_counts(normalize=True)
-            entropy = -np.sum(freq * np.log2(freq)) if not freq.empty else 0
-            entropy_scores[col] = entropy
-
-        top_col = max(entropy_scores, key=entropy_scores.get)
-        new_symptoms = set(symptom_pool[top_col]) - input_tokens - {''}
-        suggestions = sorted(new_symptoms)[:10]
+            with col3:
+                st.subheader("🧠 Suggested Narrowing Symptoms")
+                subset = pd.concat([exact_match, relevant_match]).drop_duplicates()
+                symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
+                input_tokens = set(re.findall(r"\w+", user_input.lower()))
+        
+                entropy_scores = {}
+                for col in symptom_columns:
+                    values = symptom_pool[col]
+                    freq = values.value_counts(normalize=True)
+                    entropy = -np.sum(freq * np.log2(freq)) if not freq.empty else 0
+                    entropy_scores[col] = entropy
+        
+                top_col = max(entropy_scores, key=entropy_scores.get)
+                new_symptoms = set(symptom_pool[top_col]) - input_tokens - {''}
+                suggestions = sorted(new_symptoms)[:10]
 
         if suggestions:
             st.write(f"Most discriminative symptom field: **{top_col}**")
