@@ -193,7 +193,6 @@ User input: {user_input}
     # Combine similarities (you can also average, max, or treat separately)
     df["sim_P1"] = sim_p1
     df["sim_P2"] = sim_p2
-    df["similarity"] = 
     # Exact match: Check if input tokens are in either symptom column
     exact_match = df[df[["Symptom P1", "Symptom P2"]].apply(lambda row: any(sym.lower() in user_input_clean.lower() for sym in row.astype(str)), axis=1)]
 
