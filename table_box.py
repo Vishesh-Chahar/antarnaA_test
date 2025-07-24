@@ -133,7 +133,7 @@ if uploaded_file:
     # ---------------- UI Layout ----------------
     st.title("🧠 Symptom Navigator + Local Vector Diagnosis")
 
-    col1, col2, col3 = st.columns([1.5, 1.5, 1])
+    col1, col2, col3 = st.columns([1, 1, 1])
 
     with col1:
         st.subheader("🔍 Explore by Category")
@@ -179,24 +179,38 @@ if uploaded_file:
             df["sim_P1"] = sim_p1
             df["sim_P2"] = sim_p2
 
-            relevant_match = df[df[["Symptom_P1", "Symptom_P2"]].apply(
-                lambda row: any(sym.lower() in user_input_clean.lower() for sym in row.astype(str)), axis=1)]
-
-            relevant_p1 = df[df["sim_P1"] >= threshold].sort_values("sim_P1", ascending=False)
-            relevant_p2 = df[df["sim_P2"] >= threshold].sort_values("sim_P2", ascending=False)
-
-            combined_sim = np.maximum(df["sim_P1"], df["sim_P2"])
-            df["similarity"] = combined_sim
+            # Combine similarity (take the max from P1 and P2)
+            df["similarity"] = np.maximum(df["sim_P1"], df["sim_P2"])
+            
+            # ------------------------
+            # 📌 Exact Match = strong match via embeddings (above threshold)
+            # ------------------------
             exact_match = df[df["similarity"] >= threshold]
-
+            
+            # ------------------------
+            # 📌 Relevant Match = loose text match (any mention of symptom words)
+            # ------------------------
+            input_tokens = set(re.findall(r"\w+", user_input_clean.lower()))
+            relevant_match = df[df[["Symptom_P1", "Symptom_P2"]].apply(
+                lambda row: any(
+                    any(token in input_tokens for token in re.findall(r"\w+", str(sym).lower()))
+                    for sym in row if pd.notna(sym)
+                ), axis=1)]
+            
+            # ------------------------
+            # 🧾 Display Exact Diagnoses
+            # ------------------------
             st.markdown("### 🧾 Exact Match Diagnoses")
             exact_diagnoses = exact_match["Ayurvedic_Diagnosis"].dropna().astype(str)
-            cleaned_exact = list(set(re.sub(r"^\s*\d+\s*", "", diag) for diag in exact_diagnoses))
+            cleaned_exact = sorted(set(re.sub(r"^\s*\d+\s*", "", diag.strip()) for diag in exact_diagnoses))
             st.write(cleaned_exact)
-
-            st.markdown("### 📋 Relevant Diagnoses by Similarity")
+            
+            # ------------------------
+            # 📋 Display Relevant Diagnoses
+            # ------------------------
+            st.markdown("### 📋 Relevant Diagnoses by Textual Match")
             relevant_diagnoses = relevant_match["Ayurvedic_Diagnosis"].dropna().astype(str)
-            cleaned_relevant = list(set(re.sub(r"^\s*\d+\s*", "", diag) for diag in relevant_diagnoses))
+            cleaned_relevant = sorted(set(re.sub(r"^\s*\d+\s*", "", diag.strip()) for diag in relevant_diagnoses))
             st.write(cleaned_relevant)
             with col3:
                 st.subheader("🧠 Suggested Narrowing Symptoms")
