@@ -190,6 +190,7 @@ if uploaded_file:
             relevant_match = df[df["similarity"] >= threshold]
 
             st.markdown("### 🧾 Exact Match Diagnoses")
+            
             exact_diagnoses = exact_match["Ayurvedic_Diagnosis"].dropna().astype(str)
             cleaned_exact = list(set(re.sub(r"^\s*\d+\s*", "", diag) for diag in exact_diagnoses))
             st.write(cleaned_exact)
@@ -200,7 +201,7 @@ if uploaded_file:
             st.write(cleaned_relevant)
     with col3:
         st.subheader("🧠 Suggested Narrowing Symptoms")
-        subset = pd.concat([exact_diagnoses, relevant_diagnoses]).drop_duplicates()
+        subset = pd.concat([exact_match, relevant_match]).drop_duplicates()
         symptom_pool = subset[symptom_columns].fillna("").apply(lambda x: x.str.lower())
         input_tokens = set(re.findall(r"\w+", user_input.lower()))
 
