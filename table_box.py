@@ -82,8 +82,8 @@ def build_or_load_embeddings(df):
 
     model = SentenceTransformer("all-MiniLM-L6-v2")  # avoid meta errors
 
-    p1_texts = df["Symptom P1"].fillna("").astype(str).tolist()
-    p2_texts = df["Symptom P2"].fillna("").astype(str).tolist()
+    p1_texts = df["Symptom_P1"].fillna("").astype(str).tolist()
+    p2_texts = df["Symptom_P2"].fillna("").astype(str).tolist()
 
     p1_embeddings = model.encode(p1_texts, show_progress_bar=True)
     p2_embeddings = model.encode(p2_texts, show_progress_bar=True)
