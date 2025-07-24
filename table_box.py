@@ -7,6 +7,9 @@ from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 import pickle
 
+groq_api_key = os.getenv("GROQ_API_KEY")
+groq_client = groq.Groq(api_key=groq_api_key)
+
 
 # ---------------- Configuration ----------------
 st.set_page_config(layout="wide")
@@ -46,32 +49,51 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- Dataset ----------------
-@st.cache_data
-def load_data():
-    return pd.read_csv('sample_3.csv')
+# ---------------- Dataset Upload ----------------
+uploaded_file = st.sidebar.file_uploader("📂 Upload your dataset (.csv or .xlsx)", type=["csv", "xlsx"])
 
-df = load_data()
+@st.cache_data
+def load_data(file):
+    if file.name.endswith('.csv'):
+        return pd.read_csv(file)
+    elif file.name.endswith('.xlsx'):
+        return pd.read_excel(file)
+    else:
+        return pd.DataFrame()  # fallback
+
+if uploaded_file:
+    df = load_data(uploaded_file)
+    st.sidebar.success("✅ Custom dataset loaded!")
+
+
+
+
 symptom_columns = [col for col in df.columns if "Symptom" in col]
 
-# ---------------- Vector DB ----------------
+
 @st.cache_resource
-def build_or_load_embeddings():
-    embed_file = "embeddings.pkl"
+def build_or_load_embeddings(df):
+    embed_file = "dual_embeddings.pkl"
+
     if os.path.exists(embed_file):
         with open(embed_file, "rb") as f:
             return pickle.load(f)
 
-    model = SentenceTransformer("all-MiniLM-L6-v2")
-    all_symptoms = df[symptom_columns].fillna("").agg(" ".join, axis=1)
-    embeddings = model.encode(all_symptoms.tolist(), show_progress_bar=True)
+    model = SentenceTransformer("all-MiniLM-L6-v2")  # avoid meta errors
+
+    p1_texts = df["Symptom P1"].fillna("").astype(str).tolist()
+    p2_texts = df["Symptom P2"].fillna("").astype(str).tolist()
+
+    p1_embeddings = model.encode(p1_texts, show_progress_bar=True)
+    p2_embeddings = model.encode(p2_texts, show_progress_bar=True)
 
     with open(embed_file, "wb") as f:
-        pickle.dump(embeddings, f)
+        pickle.dump((p1_embeddings, p2_embeddings), f)
 
-    return embeddings
+    return p1_embeddings, p2_embeddings
 
-symptom_embeddings = build_or_load_embeddings()
+
+p1_embed, p2_embed = build_or_load_embeddings(df)
 # model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # ---------------- Category Map ----------------
@@ -144,10 +166,50 @@ with col2:
     threshold = st.slider("🔬 Similarity Threshold for 'Relevant' Matches", min_value=0.0, max_value=1.0, value=0.75, step=0.01)
 
     if st.button("🧬 Vector Search Diagnose") and user_input:
-        input_embedding = model.encode([user_input])[0]  # Explicit device to avoid meta errors
-        similarities = cosine_similarity([input_embedding], symptom_embeddings)[0]
+         prompt = f"""
+You are a sanskrit to english translater and if there are any sanskrit terms in the user input, you convert them to english,if not, you keep them as is
 
-        df["similarity"] = similarities
+User input: {user_input}
+"""
+
+        response = groq_client.chat.completions.create(
+            model="qwen/qwen3-32b",
+            messages=[
+                {"role": "system", "content": "You convert sanskrit to english. /nothink"},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.1
+        )
+
+        user_input = response.choices[0].message.content
+        user_input_clean = user_input.strip()
+
+        input_embedding = model.encode([user_input])[0]  # Explicit device to avoid meta errors
+        
+        # Compute similarities separately
+        sim_p1 = cosine_similarity([input_embedding], p1_embeddings)[0]
+        sim_p2 = cosine_similarity([input_embedding], p2_embeddings)[0]
+        
+        # Combine similarities (you can also average, max, or treat separately)
+        df["sim_P1"] = sim_p1
+        df["sim_P2"] = sim_p2
+        df["similarity"] = 
+        # Exact match: Check if input tokens are in either symptom column
+        exact_match = df[df[["Symptom P1", "Symptom P2"]].apply(lambda row: any(sym.lower() in user_input_clean.lower() for sym in row.astype(str)), axis=1)]
+
+
+        st.markdown("### 🧾 Exact Match Diagnoses")
+        st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
+
+        st.markdown("### 📋 Relevant to Symptom P1")
+        relevant_p1 = df[df["sim_P1"] >= threshold_p1].sort_values("sim_P1", ascending=False)
+        st.dataframe(relevant_p1[["Ayurvedic_Diagnosis", "sim_P1"]])
+
+        st.markdown("### 📋 Relevant to Symptom P2")
+        relevant_p2 = df[df["sim_P2"] >= threshold_p2].sort_values("sim_P2", ascending=False)
+        st.dataframe(relevant_p2[["Ayurvedic_Diagnosis", "sim_P2"]])
+        # Relevant match: high similarity in either column
+        relevant_match = df[df["similarity"] >= threshold]
 
         exact_match = df[df[symptom_columns].apply(lambda row: any(sym.lower() in user_input.lower() for sym in row.astype(str)), axis=1)]
         relevant_match = df[df["similarity"] >= threshold]
