@@ -187,7 +187,7 @@ if uploaded_file:
 
             combined_sim = np.maximum(df["sim_P1"], df["sim_P2"])
             df["similarity"] = combined_sim
-            relevant_match = df[df["similarity"] >= threshold]
+            relevant_match = df[df["similarity"] <= threshold]
 
             st.markdown("### 🧾 Exact Match Diagnoses")
             
