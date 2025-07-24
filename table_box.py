@@ -188,8 +188,8 @@ User input: {user_input}
     input_embedding = model.encode([user_input])[0]  # Explicit device to avoid meta errors
     
     # Compute similarities separately
-    sim_p1 = cosine_similarity([input_embedding], p1_embeddings)[0]
-    sim_p2 = cosine_similarity([input_embedding], p2_embeddings)[0]
+    sim_p1 = cosine_similarity([input_embedding], p1_embed)[0]
+    sim_p2 = cosine_similarity([input_embedding], p2_embed)[0]
     
     # Combine similarities (you can also average, max, or treat separately)
     df["sim_P1"] = sim_p1
