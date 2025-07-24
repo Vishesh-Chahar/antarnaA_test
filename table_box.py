@@ -190,11 +190,14 @@ if uploaded_file:
             relevant_match = df[df["similarity"] >= threshold]
 
             st.markdown("### 🧾 Exact Match Diagnoses")
-            st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
+            exact_diagnoses = exact_match["Ayurvedic_Diagnosis"].dropna().astype(str)
+            cleaned_exact = list(set(re.sub(r"^\s*\d+\s*", "", diag) for diag in exact_diagnoses))
+            st.write(cleaned_exact)
 
             st.markdown("### 📋 Relevant Diagnoses by Similarity")
-            st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
-
+            relevant_diagnoses = relevant_match["Ayurvedic_Diagnosis"].dropna().astype(str)
+            cleaned_relevant = list(set(re.sub(r"^\s*\d+\s*", "", diag) for diag in relevant_diagnoses))
+            st.write(cleaned_relevant)
     with col3:
         st.subheader("🧠 Suggested Narrowing Symptoms")
         subset = pd.concat([exact_match, relevant_match]).drop_duplicates()
