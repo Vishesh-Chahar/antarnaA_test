@@ -168,57 +168,57 @@ with col2:
 
     if st.button("🧬 Vector Search Diagnose") and user_input:
          prompt = f"""
-You are a sanskrit to english translater and if there are any sanskrit terms in the user input, you convert them to english,if not, you keep them as is
+          You are a sanskrit to english translater and if there are any sanskrit terms in the user input, you convert them to english,if not, you keep them as is
+          
+          User input: {user_input}
+          """
 
-User input: {user_input}
-"""
-
-    response = groq_client.chat.completions.create(
-        model="qwen/qwen3-32b",
-        messages=[
-            {"role": "system", "content": "You convert sanskrit to english. /nothink"},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.1
-    )
-
-    user_input = response.choices[0].message.content
-    user_input_clean = user_input.strip()
-
-    input_embedding = model.encode([user_input])[0]  # Explicit device to avoid meta errors
-    
-    # Compute similarities separately
-    sim_p1 = cosine_similarity([input_embedding], p1_embed)[0]
-    sim_p2 = cosine_similarity([input_embedding], p2_embed)[0]
-    
-    # Combine similarities (you can also average, max, or treat separately)
-    df["sim_P1"] = sim_p1
-    df["sim_P2"] = sim_p2
-    # Exact match: Check if input tokens are in either symptom column
-    exact_match = df[df[["Symptom P1", "Symptom P2"]].apply(lambda row: any(sym.lower() in user_input_clean.lower() for sym in row.astype(str)), axis=1)]
-
-
-    st.markdown("### 🧾 Exact Match Diagnoses")
-    st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
-
-    st.markdown("### 📋 Relevant to Symptom P1")
-    relevant_p1 = df[df["sim_P1"] >= threshold_p1].sort_values("sim_P1", ascending=False)
-    st.dataframe(relevant_p1[["Ayurvedic_Diagnosis", "sim_P1"]])
-
-    st.markdown("### 📋 Relevant to Symptom P2")
-    relevant_p2 = df[df["sim_P2"] >= threshold_p2].sort_values("sim_P2", ascending=False)
-    st.dataframe(relevant_p2[["Ayurvedic_Diagnosis", "sim_P2"]])
-    # Relevant match: high similarity in either column
-    relevant_match = df[df["similarity"] >= threshold]
-
-    exact_match = df[df[symptom_columns].apply(lambda row: any(sym.lower() in user_input.lower() for sym in row.astype(str)), axis=1)]
-    relevant_match = df[df["similarity"] >= threshold]
-
-    st.markdown("### 🧾 Exact Match Diagnoses")
-    st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
-
-    st.markdown("### 📋 Relevant Diagnoses by Similarity")
-    st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
+      response = groq_client.chat.completions.create(
+          model="qwen/qwen3-32b",
+          messages=[
+              {"role": "system", "content": "You convert sanskrit to english. /nothink"},
+              {"role": "user", "content": prompt}
+          ],
+          temperature=0.1
+      )
+  
+      user_input = response.choices[0].message.content
+      user_input_clean = user_input.strip()
+  
+      input_embedding = model.encode([user_input])[0]  # Explicit device to avoid meta errors
+      
+      # Compute similarities separately
+      sim_p1 = cosine_similarity([input_embedding], p1_embed)[0]
+      sim_p2 = cosine_similarity([input_embedding], p2_embed)[0]
+      
+      # Combine similarities (you can also average, max, or treat separately)
+      df["sim_P1"] = sim_p1
+      df["sim_P2"] = sim_p2
+      # Exact match: Check if input tokens are in either symptom column
+      exact_match = df[df[["Symptom P1", "Symptom P2"]].apply(lambda row: any(sym.lower() in user_input_clean.lower() for sym in row.astype(str)), axis=1)]
+  
+  
+      st.markdown("### 🧾 Exact Match Diagnoses")
+      st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
+  
+      st.markdown("### 📋 Relevant to Symptom P1")
+      relevant_p1 = df[df["sim_P1"] >= threshold_p1].sort_values("sim_P1", ascending=False)
+      st.dataframe(relevant_p1[["Ayurvedic_Diagnosis", "sim_P1"]])
+  
+      st.markdown("### 📋 Relevant to Symptom P2")
+      relevant_p2 = df[df["sim_P2"] >= threshold_p2].sort_values("sim_P2", ascending=False)
+      st.dataframe(relevant_p2[["Ayurvedic_Diagnosis", "sim_P2"]])
+      # Relevant match: high similarity in either column
+      relevant_match = df[df["similarity"] >= threshold]
+  
+      exact_match = df[df[symptom_columns].apply(lambda row: any(sym.lower() in user_input.lower() for sym in row.astype(str)), axis=1)]
+      relevant_match = df[df["similarity"] >= threshold]
+  
+      st.markdown("### 🧾 Exact Match Diagnoses")
+      st.dataframe(exact_match[["Ayurvedic_Diagnosis"]])
+  
+      st.markdown("### 📋 Relevant Diagnoses by Similarity")
+      st.dataframe(relevant_match[["Ayurvedic_Diagnosis", "similarity"]].sort_values(by="similarity", ascending=False))
 
 with col3:
         # --------------- Adaptive Suggestions ----------------
